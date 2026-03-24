@@ -6,7 +6,9 @@
 <title>Performance Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="src/stlye.css">
+<!--
   :root {
     --bg: #0a0c10;
     --bg2: #111418;
@@ -170,8 +172,9 @@
   .truck-table tr:hover td { background:rgba(245,166,35,0.04); }
   .truck-id {
     font-family:'JetBrains Mono', monospace; font-size:0.78rem;
-    color:var(--accent); font-weight:600;
+    color:var(--accent); font-weight:600; transition:color 0.2s;
   }
+  .truck-id:hover { color:#ffb940; text-decoration:underline !important; }
   .bar-cell { display:flex; align-items:center; gap:8px; }
   .mini-bar-bg { flex:1; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
   .mini-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--green),#1ab870); transition:width 0.8s ease; }
@@ -207,7 +210,126 @@
   .kpi:nth-child(2){ animation-delay:0.10s; }
   .kpi:nth-child(3){ animation-delay:0.15s; }
   .kpi:nth-child(4){ animation-delay:0.20s; }
-</style>
+
+  /* ── MANAGEMENT BUTTONS ──────────────────── */
+  .mgmt-bar {
+    display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center;
+  }
+  .btn {
+    padding:10px 20px; border-radius:8px; font-size:0.82rem; font-weight:600;
+    cursor:pointer; border:1px solid var(--border); transition:all 0.2s;
+    font-family:'DM Sans',sans-serif; letter-spacing:0.5px;
+  }
+  .btn-primary {
+    background:var(--accent); border-color:var(--accent); color:#0a0c10;
+  }
+  .btn-primary:hover { background:#ffb940; }
+  .btn-secondary {
+    background:var(--bg3); border-color:var(--border); color:var(--text);
+  }
+  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-danger {
+    background:rgba(224,68,58,0.15); border-color:var(--red); color:var(--red);
+  }
+  .btn-danger:hover { background:rgba(224,68,58,0.3); }
+  .btn-sm { padding:6px 14px; font-size:0.75rem; }
+  .btn-icon { display:inline-flex; align-items:center; gap:6px; }
+  .mgmt-btn {
+    padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600;
+    cursor:pointer; border:1px solid var(--border); background:var(--bg3);
+    color:var(--text); transition:all 0.2s; font-family:'DM Sans',sans-serif;
+  }
+  .mgmt-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ── MODAL ───────────────────────────────── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    z-index:1000; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:32px; width:90%; max-width:560px; max-height:90vh; overflow-y:auto;
+    position:relative; animation:fadeUp 0.3s ease;
+  }
+  .modal h2 {
+    font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:2px;
+    color:var(--accent); margin-bottom:24px;
+  }
+  .modal-close {
+    position:absolute; top:16px; right:16px; background:none; border:none;
+    color:var(--muted); font-size:1.4rem; cursor:pointer; padding:4px 8px;
+    border-radius:4px; transition:color 0.2s;
+  }
+  .modal-close:hover { color:var(--text); }
+  .form-group { margin-bottom:18px; }
+  .form-group label {
+    display:block; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:1.2px; color:var(--muted); margin-bottom:6px;
+  }
+  .form-group input, .form-group select {
+    width:100%; padding:10px 14px; border-radius:8px;
+    border:1px solid var(--border); background:var(--bg3); color:var(--text);
+    font-size:0.9rem; font-family:'DM Sans',sans-serif;
+    transition:border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline:none; border-color:var(--accent);
+  }
+  .form-group input::placeholder { color:var(--muted); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .form-actions { display:flex; gap:10px; margin-top:24px; justify-content:flex-end; }
+
+  /* ── DATA MANAGER PANEL ──────────────────── */
+  .data-panel {
+    display:none; margin-bottom:20px;
+  }
+  .data-panel.open { display:block; }
+  .data-panel-inner {
+    background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px;
+  }
+  .data-panel-header {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;
+  }
+  .data-panel-title {
+    font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:2px; color:var(--text);
+  }
+  .truck-entries-list { display:flex; flex-direction:column; gap:8px; }
+  .truck-entry-row {
+    display:grid; grid-template-columns:140px 1fr 1fr 1fr 1fr auto auto; gap:10px;
+    align-items:center; padding:10px 12px; background:var(--bg3);
+    border-radius:8px; border:1px solid rgba(37,45,61,0.5);
+    font-size:0.82rem;
+  }
+  .truck-entry-row.header-row {
+    background:transparent; border:none; padding:4px 12px;
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted);
+  }
+  .entry-truck { font-family:'JetBrains Mono',monospace; color:var(--accent); font-weight:600; font-size:0.78rem; }
+  .entry-val { color:var(--label); }
+  .entry-year { color:var(--blue); font-weight:600; }
+
+  /* ── TOAST ───────────────────────────────── */
+  .toast {
+    position:fixed; bottom:32px; right:32px; background:var(--card);
+    border:1px solid var(--green); border-radius:10px; padding:14px 24px;
+    color:var(--green); font-size:0.85rem; font-weight:600; z-index:2000;
+    transform:translateY(100px); opacity:0; transition:all 0.3s ease;
+    pointer-events:none;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.error { border-color:var(--red); color:var(--red); }
+
+  /* Spreadsheet links */
+  .spread-link {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:6px 16px; border-radius:6px; font-size:0.8rem; font-weight:600;
+    text-decoration:none; border:1px solid var(--border); background:var(--bg3);
+    color:var(--label); transition:all 0.2s;
+  }
+  .spread-link:hover { border-color:var(--accent); color:var(--accent); background:rgba(245,166,35,0.08); }
+-->
 </head>
 <body>
 <div class="wrapper">
@@ -215,12 +337,11 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M1 17h2v2H1v-2zm0-4h2v2H1v-2zm0-4h2v2H1V9zm20 8H5V7h16v10zm0-12H5V3h16v2zm2 14V5H3v14h20z"/></svg>
+      <div class="logo-mark">\n        <i class="fa-solid fa-truck-fast" style="font-size:1.4rem;color:var(--accent)"></i>
       </div>
       <div class="header-text">
-        <h1>Performance Dashboard</h1>
-        <p>Truck Transport Business · 2024 – 2026 · All Trucks</p>
+        <h1><i class="fa-solid fa-chart-pie" style="margin-right:8px;font-size:0.9em"></i>Performance Dashboard</h1>
+        <p id="headerSubtitle">Truck Transport Business · 2024 – 2026 · All Trucks</p>
       </div>
     </div>
     <div class="year-tabs">
@@ -233,6 +354,51 @@
 
   <!-- KPI STRIP -->
   <div class="kpi-strip" id="kpiStrip"></div>
+
+  <!-- MANAGEMENT BAR -->
+  <div class="mgmt-bar" id="mgmtBar" data-admin-only>
+    <button class="btn btn-primary btn-icon" onclick="openAddTruck()">
+      <i class="fa-solid fa-truck-medical"></i> Add New Truck
+    </button>
+    <button class="btn btn-secondary btn-icon" onclick="openAddEntry()">
+      <i class="fa-solid fa-calendar-plus"></i> Add Year Data
+    </button>
+    <button class="btn btn-secondary" onclick="toggleDataPanel()">
+      <i class="fa-solid fa-database"></i> Manage Data
+    </button>
+    <button class="btn btn-secondary" onclick="openManageDrivers()">
+      <i class="fa-solid fa-users"></i> Manage Drivers
+    </button>
+    <button class="btn btn-secondary" onclick="openMonthlyEditor()">
+      <i class="fa-solid fa-chart-line"></i> Edit Monthly Data
+    </button>
+    <button class="btn btn-secondary" onclick="openWeeklyEditor()">
+      <i class="fa-solid fa-calendar-week"></i> Edit Weekly Data
+    </button>
+    <button class="btn btn-secondary" onclick="openExpenseEditor()">
+      <i class="fa-solid fa-receipt"></i> Edit Expenses
+    </button>
+    <button class="btn btn-danger" onclick="openDeleteYear()">
+      <i class="fa-solid fa-calendar-xmark"></i> Delete Year
+    </button>
+  </div>
+
+  <!-- SPREADSHEET LINKS -->
+  <div class="mgmt-bar" id="spreadBar" data-admin-only style="gap:8px;margin-bottom:16px">
+    <span style="font-size:0.78rem;color:var(--muted);letter-spacing:0.5px;font-weight:600;text-transform:uppercase">Edit in Spreadsheet:</span>
+    <div id="spreadsheetLinks" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- DATA PANEL (toggle) -->
+  <div class="data-panel" id="dataPanel">
+    <div class="data-panel-inner">
+      <div class="data-panel-header">
+        <span class="data-panel-title"><i class="fa-solid fa-database" style="margin-right:6px"></i>All Truck Entries</span>
+        <button class="btn btn-sm btn-secondary" onclick="toggleDataPanel()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+      <div class="truck-entries-list" id="truckEntriesList"></div>
+    </div>
+  </div>
 
   <!-- MAIN CHARTS -->
   <div class="main-grid">
@@ -292,455 +458,285 @@
     </div>
   </div>
 
+  <!-- BREAK-EVEN & PROFIT CHART -->
+  <div class="chart-card wide" id="breakEvenCard" style="margin-bottom:20px">
+    <div class="card-header">
+      <span class="card-title"><i class="fa-solid fa-scale-balanced" style="margin-right:8px;color:var(--green)"></i>Break-Even &amp; Profit After Recovery</span>
+      <span class="card-pill" style="background:rgba(45,224,138,0.1);color:var(--green);border-color:rgba(45,224,138,0.2)">Cumulative · All Years</span>
+    </div>
+    <p id="breakEvenSubtitle" style="font-size:0.75rem;color:var(--muted);margin-bottom:16px">Loading break-even data…</p>
+    <canvas id="breakEvenChart" height="100"></canvas>
+  </div>
+
   <!-- TRUCK TABLE -->
   <div class="chart-card">
     <div class="card-header">
-      <span class="card-title">Fleet Leaderboard</span>
+      <span class="card-title">Leaderboard</span>
       <span class="card-pill" id="tableYearPill">All Years Combined</span>
     </div>
     <table class="truck-table" id="truckTable"></table>
   </div>
 
   <div class="footer-note">
-    All figures in Ghana Cedis (GHS) · Working days Mon–Sat · Income tax renewal GHS 120/quarter
+    <a href="pages/recover.html" style="color:var(--muted);text-decoration:none;font-size:0.75rem;display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+      <i class="fa-solid fa-trash-can-arrow-up"></i> Recovery
+    </a>
+    <br><i class="fa-regular fa-copyright"></i> 2026 All Rights Reserved
   </div>
 </div>
 
-<script>
-// ─── DATA ────────────────────────────────────────────────────────────────────
-const DATA = {
-  monthly: {
-    all: {
-      labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
-      gross:  [18000,24000,23000,23000,22000,51000,56000,82000,86000,66000,73000,83500,60000,60000,97000,81000,104000,109000,130000,180500,155500,128500,140000,43000],
-      exp:    [120,4300,3500,9120,9500,32600,3120,9020,46550,5310,76500,30300,30540,3300,5600,7310,16950,0,14960,51020,9250,8550,37600,0],
-    },
-    2024: {
-      labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      gross:  [18000,24000,23000,23000,22000,51000,56000,82000,86000],
-      exp:    [120,4300,3500,9120,9500,32600,3120,9020,46550],
-    },
-    2025: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      gross:  [66000,73000,83500,60000,60000,97000,81000,104000,109000,130000,180500,155500],
-      exp:    [5310,76500,30300,30540,3300,5600,7310,16950,0,14960,51020,9250],
-    },
-    2026: {
-      labels: ['Jan','Feb','Mar'],
-      gross:  [128500,140000,43000],
-      exp:    [8550,37600,0],
-    },
-  },
-  yearlyTotals: {
-    2024: { gross:385000, exp:117830, net:267170 },
-    2025: { gross:1199500, exp:251040, net:948460 },
-    2026: { gross:311500, exp:46150, net:265350 },
-  },
-  trucks: {
-    'GT 6350-19': {
-      2024:{ gross:219000, exp:81260, net:137740, weeks:38 },
-      2025:{ gross:29000,  exp:6270,  net:22730,  weeks:6  },
-    },
-    'GN 4106-18': {
-      2024:{ gross:101000, exp:19720, net:81280,  weeks:17 },
-      2025:{ gross:329000, exp:77930, net:251070, weeks:52 },
-      2026:{ gross:59000,  exp:1770,  net:57230,  weeks:52 },
-    },
-    'GW 1568-22': {
-      2024:{ gross:65000,  exp:16850, net:48150,  weeks:10 },
-      2025:{ gross:372000, exp:86130, net:285870, weeks:51 },
-      2026:{ gross:14500,  exp:1470,  net:13030,  weeks:52 },
-    },
-    'GN 1674-21': {
-      2025:{ gross:257000, exp:71490, net:185510, weeks:41 },
-      2026:{ gross:73000,  exp:1770,  net:71230,  weeks:52 },
-    },
-    'GN 4394-25': {
-      2025:{ gross:166500, exp:5070,  net:161430, weeks:16 },
-      2026:{ gross:92000,  exp:37770, net:54230,  weeks:52 },
-    },
-    'GX 4502-22': {
-      2025:{ gross:46000,  exp:4150,  net:41850,  weeks:6  },
-      2026:{ gross:73000,  exp:3370,  net:69630,  weeks:52 },
-    },
-  },
-  expBreakdown: {
-    all:  { maint:46200+12000, other:105830+318040 },
-    2024: { maint:12000,  other:105830 },
-    2025: { maint:46200,  other:204840 },
-    2026: { maint:6600,   other:39550  },
-  },
-};
-
-// ─── CHART DEFAULTS ──────────────────────────────────────────────────────────
-Chart.defaults.color = '#6b7a96';
-Chart.defaults.font.family = 'DM Sans';
-Chart.defaults.plugins.legend.display = false;
-
-const COLORS = {
-  accent:  '#f5a623',
-  accent2: '#e05c1a',
-  green:   '#2de08a',
-  red:     '#e0443a',
-  blue:    '#4a9eff',
-  purple:  '#9b72ff',
-  cyan:    '#22d3ee',
-  pink:    '#f472b6',
-};
-const TRUCK_COLORS = ['#f5a623','#4a9eff','#2de08a','#9b72ff','#e0443a','#22d3ee'];
-
-let currentYear = 'all';
-let charts = {};
-
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function fmt(n) {
-  if(n >= 1000000) return 'GHS ' + (n/1000000).toFixed(2) + 'M';
-  if(n >= 1000) return 'GHS ' + (n/1000).toFixed(0) + 'K';
-  return 'GHS ' + n.toLocaleString();
-}
-
-function getTruckData(year) {
-  const trucks = DATA.trucks;
-  return Object.keys(trucks).map(id => {
-    let gross=0,exp=0,net=0,weeks=0;
-    const years = year === 'all' ? Object.keys(trucks[id]) : [String(year)];
-    years.forEach(y => {
-      if(trucks[id][y]) {
-        gross  += trucks[id][y].gross;
-        exp    += trucks[id][y].exp;
-        net    += trucks[id][y].net;
-        weeks  += trucks[id][y].weeks;
-      }
-    });
-    return { id, gross, exp, net, weeks, eff: gross ? Math.round(net/gross*100) : 0 };
-  }).filter(t => t.gross > 0).sort((a,b) => b.net - a.net);
-}
-
-function getYearlyKPIs(year) {
-  if(year === 'all') {
-    const gross = Object.values(DATA.yearlyTotals).reduce((s,y)=>s+y.gross,0);
-    const exp   = Object.values(DATA.yearlyTotals).reduce((s,y)=>s+y.exp,0);
-    const net   = gross - exp;
-    const weeks = 65+172+260;
-    return { gross, exp, net, weeks };
-  }
-  const y = DATA.yearlyTotals[year];
-  const wMap = {2024:65,2025:172,2026:260};
-  return { gross:y.gross, exp:y.exp, net:y.gross-y.exp, weeks:wMap[year]||0 };
-}
-
-// ─── KPIs ────────────────────────────────────────────────────────────────────
-function renderKPIs(year) {
-  const {gross,exp,net,weeks} = getYearlyKPIs(year);
-  const eff = Math.round(net/gross*100);
-  const avgWeek = Math.round(gross/weeks);
-  const el = document.getElementById('kpiStrip');
-  el.innerHTML = `
-    <div class="kpi">
-      <div class="kpi-label">Total Gross Income</div>
-      <div class="kpi-value">${fmt(gross)}</div>
-      <div class="kpi-sub">${weeks} operational weeks</div>
+<!-- ADD TRUCK MODAL -->
+<div class="modal-overlay" id="addTruckModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addTruckModal')">&times;</button>
+    <h2><i class="fa-solid fa-truck-medical" style="margin-right:8px;color:var(--accent)"></i>Add New Truck</h2>
+    <div class="form-group">
+      <label>Truck ID (e.g. GN 1234-25)</label>
+      <input type="text" id="newTruckId" placeholder="GX 0000-00">
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Total Net Income</div>
-      <div class="kpi-value">${fmt(net)}</div>
-      <span class="kpi-badge badge-up">▲ ${eff}% efficiency</span>
+    <div class="form-group">
+      <label>Driver Name</label>
+      <input type="text" id="newTruckDriver" placeholder="Driver name">
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Total Expenditure</div>
-      <div class="kpi-value">${fmt(exp)}</div>
-      <div class="kpi-sub">${Math.round(exp/gross*100)}% of gross income</div>
+    <div style="margin-bottom:8px;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600">
+      <i class="fa-solid fa-money-bill-transfer" style="margin-right:4px;color:var(--accent)"></i>Truck Cost (GHS)
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Avg Weekly Gross</div>
-      <div class="kpi-value">${fmt(avgWeek)}</div>
-      <div class="kpi-sub">Per week across all trucks</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Initial Value</label>
+        <input type="number" id="newTruckInitialValue" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Price Paid</label>
+        <input type="number" id="newTruckPricePaid" placeholder="0" min="0">
+      </div>
     </div>
-  `;
-}
+    <div class="form-group">
+      <label>Initial Maintenance / Repairs (GHS)</label>
+      <input type="number" id="newTruckMaintCost" placeholder="0" min="0">
+    </div>
+    <div id="newTruckTotalAmount" style="margin:-2px 0 14px;font-size:0.78rem;color:var(--label);font-weight:600">Total Amount: GHS 0</div>
+    <h2 style="font-size:1.1rem;margin-top:8px;">First Year Entry</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Year</label>
+        <select id="newTruckYear" onchange="document.getElementById('newTruckWeeks').value=getWeeksForYear(this.value)"></select>
+      </div>
+      <div class="form-group">
+        <label>Weeks Operated</label>
+        <input type="number" id="newTruckWeeks" placeholder="0" min="0" max="53">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gross Income (GHS)</label>
+        <input type="number" id="newTruckGross" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Expenditure (GHS)</label>
+        <input type="number" id="newTruckExp" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('addTruckModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddTruck()"><i class="fa-solid fa-plus"></i> Add Truck</button>
+    </div>
+  </div>
+</div>
 
-// ─── MONTHLY CHART ────────────────────────────────────────────────────────────
-function renderMonthly(year) {
-  const d = DATA.monthly[year] || DATA.monthly.all;
-  const net = d.gross.map((g,i) => g - (d.exp[i]||0));
-  const ctx = document.getElementById('monthlyChart').getContext('2d');
-  if(charts.monthly) charts.monthly.destroy();
-  charts.monthly = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: d.labels,
-      datasets: [
-        {
-          label:'Gross Income', data:d.gross,
-          backgroundColor:'rgba(245,166,35,0.75)', borderColor:'#f5a623',
-          borderWidth:1, borderRadius:4, order:2,
-        },
-        {
-          label:'Expenditure', data:d.exp,
-          backgroundColor:'rgba(224,68,58,0.65)', borderColor:'#e0443a',
-          borderWidth:1, borderRadius:4, order:2,
-        },
-        {
-          label:'Net Income', data:net,
-          type:'line', borderColor:'#2de08a', backgroundColor:'rgba(45,224,138,0.1)',
-          borderWidth:2.5, pointBackgroundColor:'#2de08a', pointRadius:4,
-          tension:0.4, fill:true, order:1,
-        },
-      ]
-    },
-    options: {
-      responsive:true, interaction:{mode:'index',intersect:false},
-      plugins:{
-        tooltip:{
-          backgroundColor:'#1a1f2b', borderColor:'#252d3d', borderWidth:1,
-          callbacks:{
-            label: ctx => ` ${ctx.dataset.label}: GHS ${ctx.parsed.y.toLocaleString()}`
-          }
-        }
-      },
-      scales:{
-        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7a96'} },
-        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7a96',
-          callback: v => 'GHS '+(v/1000)+'K' } }
-      }
-    }
-  });
-}
+<!-- ADD YEAR ENTRY MODAL -->
+<div class="modal-overlay" id="addEntryModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addEntryModal')">&times;</button>
+    <h2><i class="fa-solid fa-calendar-plus" style="margin-right:8px;color:var(--accent)"></i>Add Year Data</h2>
+    <div class="form-group">
+      <label>Select Truck</label>
+      <select id="entryTruckSelect"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Year</label>
+        <select id="entryYear" onchange="document.getElementById('entryWeeks').value=getWeeksForYear(this.value)"></select>
+      </div>
+      <div class="form-group">
+        <label>Weeks Operated</label>
+        <input type="number" id="entryWeeks" placeholder="0" min="0" max="53">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gross Income (GHS)</label>
+        <input type="number" id="entryGross" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Expenditure (GHS)</label>
+        <input type="number" id="entryExp" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('addEntryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddEntry()"><i class="fa-solid fa-floppy-disk"></i> Save Entry</button>
+    </div>
+  </div>
+</div>
 
-// ─── TRUCK INCOME CHART ───────────────────────────────────────────────────────
-function renderTruckIncome(year) {
-  const trucks = getTruckData(year);
-  const ctx = document.getElementById('truckIncomeChart').getContext('2d');
-  if(charts.truckIncome) charts.truckIncome.destroy();
-  charts.truckIncome = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: trucks.map(t=>t.id),
-      datasets:[
-        { label:'Gross', data:trucks.map(t=>t.gross),
-          backgroundColor: TRUCK_COLORS.map(c=>c+'99'), borderColor:TRUCK_COLORS,
-          borderWidth:1.5, borderRadius:5 },
-        { label:'Net', data:trucks.map(t=>t.net),
-          backgroundColor: TRUCK_COLORS.map(c=>c+'44'), borderColor:TRUCK_COLORS.map(c=>c+'88'),
-          borderWidth:1, borderRadius:5 },
-      ]
-    },
-    options:{
-      responsive:true, indexAxis:'y',
-      plugins:{ tooltip:{ backgroundColor:'#1a1f2b', borderColor:'#252d3d', borderWidth:1,
-        callbacks:{ label: ctx => ` ${ctx.dataset.label}: GHS ${ctx.parsed.x.toLocaleString()}` }
-      }},
-      scales:{
-        x:{ stacked:false, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7a96',callback:v=>'GHS '+(v/1000)+'K'} },
-        y:{ grid:{display:false}, ticks:{color:'#9aa4b8', font:{family:'JetBrains Mono',size:11}} }
-      }
-    }
-  });
-}
+<!-- EDIT ENTRY MODAL -->
+<div class="modal-overlay" id="editEntryModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editEntryModal')">&times;</button>
+    <h2 id="editEntryTitle"><i class="fa-solid fa-pen-to-square" style="margin-right:8px;color:var(--accent)"></i>Edit Entry</h2>
+    <input type="hidden" id="editTruckId">
+    <input type="hidden" id="editYearKey">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Year</label>
+        <input type="text" id="editYear" readonly style="opacity:0.6">
+      </div>
+      <div class="form-group">
+        <label>Weeks Operated</label>
+        <input type="number" id="editWeeks" min="0" max="53">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gross Income (GHS)</label>
+        <input type="number" id="editGross" min="0">
+      </div>
+      <div class="form-group">
+        <label>Expenditure (GHS)</label>
+        <input type="number" id="editExp" min="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" onclick="deleteEntry()" style="margin-right:auto"><i class="fa-solid fa-trash"></i> Delete Entry</button>
+      <button class="btn btn-secondary" onclick="closeModal('editEntryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEditEntry()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
 
-// ─── EXPENDITURE BREAKDOWN ────────────────────────────────────────────────────
-function renderExpBreakdown(year) {
-  const d = DATA.expBreakdown[year] || DATA.expBreakdown.all;
-  const ctx = document.getElementById('expBreakdownChart').getContext('2d');
-  if(charts.expBreak) charts.expBreak.destroy();
-  charts.expBreak = new Chart(ctx, {
-    type:'doughnut',
-    data:{
-      labels:['Maintenance (Oil Changes)','Other Expenses (Parts)'],
-      datasets:[{
-        data:[d.maint, d.other],
-        backgroundColor:['rgba(45,224,138,0.8)','rgba(224,68,58,0.8)'],
-        borderColor:['#2de08a','#e0443a'],
-        borderWidth:2, hoverOffset:8
-      }]
-    },
-    options:{
-      responsive:true, cutout:'68%',
-      plugins:{
-        legend:{ display:true, position:'bottom',
-          labels:{color:'#9aa4b8', padding:16, usePointStyle:true} },
-        tooltip:{ backgroundColor:'#1a1f2b', borderColor:'#252d3d', borderWidth:1,
-          callbacks:{ label: ctx => ` GHS ${ctx.parsed.toLocaleString()} (${Math.round(ctx.parsed/(d.maint+d.other)*100)}%)` }
-        }
-      }
-    }
-  });
-}
+<!-- MANAGE DRIVERS MODAL -->
+<div class="modal-overlay" id="driversModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('driversModal')">&times;</button>
+    <h2><i class="fa-solid fa-users" style="margin-right:8px;color:var(--accent)"></i>Manage Drivers</h2>
+    <div id="driversForm"></div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('driversModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitDrivers()"><i class="fa-solid fa-floppy-disk"></i> Save All</button>
+    </div>
+  </div>
+</div>
 
-// ─── YEARLY CHART ─────────────────────────────────────────────────────────────
-function renderYearly() {
-  const years = [2024,2025,2026];
-  const ctx = document.getElementById('yearlyChart').getContext('2d');
-  if(charts.yearly) charts.yearly.destroy();
-  charts.yearly = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: years,
-      datasets:[
-        { label:'Gross', data:years.map(y=>DATA.yearlyTotals[y].gross),
-          backgroundColor:'rgba(245,166,35,0.7)', borderColor:'#f5a623', borderWidth:1.5, borderRadius:5 },
-        { label:'Net', data:years.map(y=>DATA.yearlyTotals[y].gross-DATA.yearlyTotals[y].exp),
-          backgroundColor:'rgba(45,224,138,0.6)', borderColor:'#2de08a', borderWidth:1.5, borderRadius:5 },
-        { label:'Exp', data:years.map(y=>DATA.yearlyTotals[y].exp),
-          backgroundColor:'rgba(224,68,58,0.6)', borderColor:'#e0443a', borderWidth:1.5, borderRadius:5 },
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{display:true,position:'bottom',labels:{color:'#9aa4b8',padding:12,usePointStyle:true}},
-        tooltip:{ backgroundColor:'#1a1f2b', borderColor:'#252d3d', borderWidth:1,
-          callbacks:{label:ctx=>` ${ctx.dataset.label}: GHS ${ctx.parsed.y.toLocaleString()}`} }
-      },
-      scales:{
-        x:{ grid:{display:false}, ticks:{color:'#9aa4b8'} },
-        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7a96',callback:v=>'GHS '+(v/1000)+'K'} }
-      }
-    }
-  });
-}
+<!-- MONTHLY DATA EDITOR MODAL -->
+<div class="modal-overlay" id="monthlyModal">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('monthlyModal')">&times;</button>
+    <h2><i class="fa-solid fa-chart-line" style="margin-right:8px;color:var(--accent)"></i>Edit Monthly Data</h2>
+    <div class="form-row" style="gap:12px;margin-bottom:12px">
+      <div class="form-group" style="flex:1">
+        <label>Select Year</label>
+        <select id="monthlyYearSelect" onchange="loadMonthlyForm()"></select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Select Month</label>
+        <select id="monthlyMonthSelect" onchange="loadMonthlyMonth()"></select>
+      </div>
+    </div>
+    <div id="monthlyForm"></div>
+    <div class="form-actions" style="gap:8px">
+      <button class="btn btn-secondary" onclick="monthlyNav(-1)" id="monthPrevBtn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+      <button class="btn btn-secondary" onclick="closeModal('monthlyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMonthlyMonth()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+      <button class="btn btn-secondary" onclick="monthlyNav(1)" id="monthNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
 
-// ─── EFFICIENCY RADAR / BAR ───────────────────────────────────────────────────
-function renderEfficiency(year) {
-  const trucks = getTruckData(year);
-  const ctx = document.getElementById('efficiencyChart').getContext('2d');
-  if(charts.eff) charts.eff.destroy();
-  charts.eff = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: trucks.map(t=>t.id),
-      datasets:[{
-        label:'Efficiency %',
-        data: trucks.map(t=>t.eff),
-        backgroundColor: trucks.map(t =>
-          t.eff > 80 ? 'rgba(45,224,138,0.75)' :
-          t.eff > 60 ? 'rgba(245,166,35,0.75)' :
-          'rgba(224,68,58,0.75)'
-        ),
-        borderColor: trucks.map(t =>
-          t.eff > 80 ? '#2de08a' : t.eff > 60 ? '#f5a623' : '#e0443a'
-        ),
-        borderWidth:1.5, borderRadius:5
-      }]
-    },
-    options:{
-      responsive:true, indexAxis:'y',
-      plugins:{ tooltip:{ backgroundColor:'#1a1f2b', borderColor:'#252d3d', borderWidth:1,
-        callbacks:{ label: ctx => ` Net efficiency: ${ctx.parsed.x}%` }
-      }},
-      scales:{
-        x:{ max:100, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7a96',callback:v=>v+'%'} },
-        y:{ grid:{display:false}, ticks:{color:'#9aa4b8',font:{family:'JetBrains Mono',size:11}} }
-      }
-    }
-  });
-}
+<!-- WEEKLY DATA EDITOR MODAL -->
+<div class="modal-overlay" id="weeklyModal">
+  <div class="modal" style="max-width:850px;max-height:85vh;display:flex;flex-direction:column">
+    <button class="modal-close" onclick="closeModal('weeklyModal')">&times;</button>
+    <h2><i class="fa-solid fa-calendar-week" style="margin-right:8px;color:var(--accent)"></i>Edit Weekly Data</h2>
+    <div class="form-row" style="gap:12px;margin-bottom:12px">
+      <div class="form-group" style="flex:1">
+        <label>Select Truck</label>
+        <select id="weeklyTruckSelect" onchange="loadWeeklyForm()"></select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Select Week</label>
+        <select id="weeklyWeekSelect" onchange="loadWeeklyWeek()"></select>
+      </div>
+    </div>
+    <div id="weeklyForm" style="overflow-y:auto;flex:1"></div>
+    <div style="font-size:0.75rem;color:var(--muted);padding:8px 0;border-top:1px solid var(--border);margin-top:8px">
+      <i class="fa-solid fa-circle-info"></i> Weekly totals auto-update monthly data when saved.
+      <span id="weeklyTruckWeeks" style="float:right;color:var(--accent);font-weight:600"></span>
+    </div>
+    <div class="form-actions" style="gap:8px">
+      <button class="btn btn-secondary" onclick="weeklyNav(-1)" id="weekPrevBtn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+      <button class="btn btn-secondary" onclick="closeModal('weeklyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveWeeklyWeek()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+      <button class="btn btn-secondary" onclick="weeklyNav(1)" id="weekNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
 
-// ─── HEATMAP ──────────────────────────────────────────────────────────────────
-function renderHeatmap() {
-  const trucks = Object.keys(DATA.trucks);
-  const years  = [2024, 2025, 2026];
-  const allNets = trucks.flatMap(t => years.map(y => DATA.trucks[t][y]?.net || 0));
-  const maxNet  = Math.max(...allNets);
+<!-- EXPENSE EDITOR MODAL -->
+<div class="modal-overlay" id="expenseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('expenseModal')">&times;</button>
+    <h2><i class="fa-solid fa-receipt" style="margin-right:8px;color:var(--accent)"></i>Edit Expense Breakdown</h2>
+    <div class="form-group">
+      <label>Select Year</label>
+      <select id="expYearSelect" onchange="loadExpenseForm()"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Maintenance / Oil Changes (GHS)</label>
+        <input type="number" id="expMaint" min="0">
+      </div>
+      <div class="form-group">
+        <label>Other Expenses / Parts (GHS)</label>
+        <input type="number" id="expOther" min="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitExpenses()"><i class="fa-solid fa-floppy-disk"></i> Save Expenses</button>
+    </div>
+  </div>
+</div>
 
-  let html = `<div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
-      <tr>
-        <th style="padding:6px 8px;color:var(--muted);text-align:left;font-weight:500;font-size:0.68rem;text-transform:uppercase;letter-spacing:1px">Truck</th>
-        ${years.map(y=>`<th style="padding:6px 10px;color:var(--muted);text-align:center;font-weight:500;font-size:0.68rem;letter-spacing:1px">${y}</th>`).join('')}
-      </tr>`;
-  trucks.forEach(t => {
-    html += `<tr>
-      <td style="padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--accent);white-space:nowrap">${t}</td>`;
-    years.forEach(y => {
-      const d = DATA.trucks[t][y];
-      const net = d?.net || 0;
-      const ratio = maxNet ? net/maxNet : 0;
-      const alpha = net > 0 ? (0.15 + ratio * 0.75).toFixed(2) : '0.08';
-      const textColor = net > 0 ? (ratio > 0.5 ? '#fff' : '#e8ecf4') : 'var(--muted)';
-      const bg = net > 0
-        ? `rgba(45,224,138,${alpha})`
-        : net < 0
-          ? `rgba(224,68,58,0.3)`
-          : `rgba(255,255,255,0.04)`;
-      const label = net > 0 ? `GHS ${(net/1000).toFixed(0)}K` : (d ? `GHS ${(net/1000).toFixed(0)}K` : '—');
-      html += `<td style="padding:7px 8px;text-align:center;background:${bg};color:${textColor};border-radius:4px;font-weight:600;letter-spacing:0.3px">${label}</td>`;
-    });
-    html += `</tr>`;
-  });
-  html += `</table></div>`;
-  document.getElementById('heatmapContainer').innerHTML = html;
-}
+<!-- DELETE TRUCK CONFIRMATION MODAL -->
+<div class="modal-overlay" id="deleteTruckModal">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <h2 style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px"></i>Delete Truck?</h2>
+    <p style="color:var(--label);margin-bottom:20px" id="deleteTruckMsg"></p>
+    <input type="hidden" id="deleteTruckId">
+    <div class="form-actions" style="justify-content:center">
+      <button class="btn btn-secondary" onclick="closeModal('deleteTruckModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteTruck()"><i class="fa-solid fa-trash"></i> Delete</button>
+    </div>
+  </div>
+</div>
 
-// ─── TRUCK TABLE ──────────────────────────────────────────────────────────────
-function renderTable(year) {
-  const trucks = getTruckData(year);
-  const maxNet = Math.max(...trucks.map(t=>t.net));
-  const ranks = ['r1','r2','r3','r4','r5','r6'];
-  const drivers = {
-    'GT 6350-19':'Paapa','GN 4106-18':'Isaac/Alfred',
-    'GW 1568-22':'Oliver','GN 1674-21':'JAT',
-    'GN 4394-25':'ATL Isaac','GX 4502-22':'Agoe'
-  };
-  document.getElementById('tableYearPill').textContent =
-    year === 'all' ? 'All Years Combined' : `Year ${year}`;
+<!-- DELETE YEAR CONFIRMATION MODAL -->
+<div class="modal-overlay" id="deleteYearModal">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <h2 style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px"></i>Delete Year?</h2>
+    <p style="color:var(--label);margin-bottom:20px" id="deleteYearMsg"></p>
+    <div class="form-actions" style="justify-content:center">
+      <button class="btn btn-secondary" onclick="closeModal('deleteYearModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteYear()"><i class="fa-solid fa-trash"></i> Delete All Data</button>
+    </div>
+  </div>
+</div>
 
-  let html = `
-    <thead><tr>
-      <th>Rank</th><th>Truck ID</th><th>Driver</th>
-      <th>Gross (GHS)</th><th>Expenditure (GHS)</th><th>Net Income (GHS)</th>
-      <th>Weeks Operated</th><th>Efficiency</th><th>Net Income Bar</th>
-    </tr></thead><tbody>`;
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-  trucks.forEach((t,i) => {
-    const pct = maxNet ? Math.round(t.net/maxNet*100) : 0;
-    const effColor = t.eff>80?'var(--green)':t.eff>60?'var(--accent)':'var(--red)';
-    html += `<tr>
-      <td><span class="rank-badge ${ranks[i]}">${i+1}</span></td>
-      <td><span class="truck-id">${t.id}</span></td>
-      <td style="color:var(--label)">${drivers[t.id]||'—'}</td>
-      <td style="color:var(--accent);font-weight:600">${t.gross.toLocaleString()}</td>
-      <td style="color:var(--red)">${t.exp.toLocaleString()}</td>
-      <td style="color:var(--green);font-weight:700">${t.net.toLocaleString()}</td>
-      <td style="color:var(--muted);text-align:center">${t.weeks}</td>
-      <td style="color:${effColor};font-weight:600;font-family:'JetBrains Mono',monospace">${t.eff}%</td>
-      <td style="min-width:100px">
-        <div class="bar-cell">
-          <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
-          <span style="font-size:0.7rem;color:var(--muted);min-width:28px">${pct}%</span>
-        </div>
-      </td>
-    </tr>`;
-  });
-  html += `</tbody>`;
-  document.getElementById('truckTable').innerHTML = html;
-}
-
-// ─── YEAR SWITCH ──────────────────────────────────────────────────────────────
-function setYear(year) {
-  currentYear = year;
-  document.querySelectorAll('.year-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.year === String(year));
-  });
-  renderKPIs(year);
-  renderMonthly(year);
-  renderTruckIncome(year);
-  renderExpBreakdown(year);
-  renderEfficiency(year);
-  renderTable(year);
-  // yearly and heatmap stay fixed
-}
-
-// ─── INIT ──────────────────────────────────────────────────────────────────────
-renderKPIs('all');
-renderMonthly('all');
-renderTruckIncome('all');
-renderExpBreakdown('all');
-renderYearly();
-renderEfficiency('all');
-renderHeatmap();
-renderTable('all');
-</script>
-</body>
-</html>
+<script src="src/auth.js"></script>
+<script src="src/script.js"></script>
 </body>
 </html>

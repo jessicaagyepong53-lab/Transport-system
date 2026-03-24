@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../src/login.css">
+<!--
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111418;
+    --bg3: #181c24;
+    --card: #1a1f2b;
+    --border: #252d3d;
+    --accent: #f5a623;
+    --accent2: #e05c1a;
+    --green: #2de08a;
+    --red: #e0443a;
+    --blue: #4a9eff;
+    --text: #e8ecf4;
+    --muted: #6b7a96;
+    --label: #9aa4b8;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(245,166,35,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+
+  .login-card {
+    position: relative; z-index: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 36px 32px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .login-logo i {
+    font-size: 2.4rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .login-logo h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+
+  .login-logo p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--label);
+    margin-bottom: 6px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .error-msg {
+    text-align: center;
+    color: var(--red);
+    font-size: 0.82rem;
+    margin-top: 12px;
+    min-height: 20px;
+  }
+
+  .toast {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    padding:12px 28px; border-radius:10px;
+    background:var(--green); color:var(--bg); font-weight:600;
+    font-size:0.88rem; opacity:0; pointer-events:none;
+    transition:opacity 0.3s;
+    z-index:9999;
+  }
+  .toast.show { opacity:1; }
+  .toast.error { background:var(--red); color:#fff; }
+-->
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-logo">
+    <i class="fa-solid fa-truck-fast"></i>
+    <h1>Transport Dashboard</h1>
+    <p>Truck Transport Business Performance</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn" onclick="switchTab('login')">Login</button>
+    <button class="tab-btn active" onclick="switchTab('signup')">Sign Up</button>
+  </div>
+
+  <form id="authForm" onsubmit="handleSubmit(event)">
+    <div class="form-group">
+      <label for="emailInput">Email Address</label>
+      <input type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Sign Up</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let mode = 'signup';
+
+// Auto-redirect if already logged in
+(async function checkAuth() {
+  const stored = localStorage.getItem('transport_auth');
+  if (!stored) return;
+  try {
+    const auth = JSON.parse(stored);
+    const resp = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + auth.token } });
+    if (resp.ok) {
+      window.location.href = '/index.html';
+    } else {
+      localStorage.removeItem('transport_auth');
+    }
+  } catch { localStorage.removeItem('transport_auth'); }
+})();
+
+function switchTab(tab) {
+  mode = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'));
+  });
+  document.getElementById('submitBtn').textContent = tab === 'login' ? 'Login' : 'Sign Up';
+  document.getElementById('errorMsg').textContent = '';
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('emailInput').value.trim();
+  const btn = document.getElementById('submitBtn');
+  const err = document.getElementById('errorMsg');
+  err.textContent = '';
+  if (!email) { err.textContent = 'Please enter your email'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Please wait...';
+
+  try {
+    const endpoint = mode === 'login' ? '/api/login' : '/api/signup';
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      err.textContent = data.error || 'Something went wrong';
+      btn.disabled = false;
+      btn.textContent = mode === 'login' ? 'Login' : 'Sign Up';
+      return;
+    }
+
+    localStorage.setItem('transport_auth', JSON.stringify({
+      token: data.token,
+      email: data.email,
+      role: data.role
+    }));
+
+    window.location.href = '/index.html';
+  } catch (ex) {
+    err.textContent = 'Network error — is the server running?';
+    btn.disabled = false;
+    btn.textContent = mode === 'login' ? 'Login' : 'Sign Up';
+  }
+}
+</script>
+</body>
+</html>
