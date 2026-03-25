@@ -109,6 +109,15 @@
   .badge-up { background:rgba(45,224,138,0.15); color:var(--green); }
   .badge-down { background:rgba(224,68,58,0.15); color:var(--red); }
 
+  /* ── WEEKS STRIP ─────────────────────────── */
+  #weeksStrip {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    margin-bottom: 20px; padding: 10px 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  #weeksStrip:empty { display: none; }
+
   /* ── MAIN GRID ───────────────────────────── */
   .main-grid {
     display: grid;

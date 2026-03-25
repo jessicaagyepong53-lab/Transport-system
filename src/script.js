@@ -395,11 +395,11 @@ function renderKPIs(year) {
       <div class="kpi-sub">Per week across all trucks</div>
     </div>
   `;
-  if (truckWeeksHtml) {
-    el.innerHTML += `<div style="grid-column:1/-1;padding:0 4px;display:flex;flex-wrap:wrap;align-items:center;gap:4px">
-      <span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-right:4px"><i class="fa-solid fa-truck" style="margin-right:3px"></i>Weeks per Truck:</span>
-      ${truckWeeksHtml}
-    </div>`;
+  const weeksEl = document.getElementById('weeksStrip');
+  if (weeksEl) {
+    weeksEl.innerHTML = truckWeeksHtml
+      ? `<span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-right:4px"><i class="fa-solid fa-truck" style="margin-right:3px"></i>Weeks per Truck:</span>${truckWeeksHtml}`
+      : '';
   }
 }
 
@@ -1474,14 +1474,9 @@ document.addEventListener('click', e => {
 recalcYearlyTotals();
 recalcExpBreakdownAll();
 renderYearTabs();
-renderKPIs('all');
-renderMonthly('all');
-renderTruckIncome('all');
-renderExpBreakdown('all');
+setYear('all');
 renderYearly();
-renderEfficiency('all');
 renderHeatmap();
-renderTable('all');
 renderBreakEvenChart();
 
 ['newTruckInitialValue', 'newTruckPricePaid', 'newTruckMaintCost'].forEach(id => {
